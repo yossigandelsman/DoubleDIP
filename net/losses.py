@@ -83,6 +83,22 @@ class ExclusionLoss(nn.Module):
         return gradx, grady
 
 
+class ExtendedL1Loss(nn.Module):
+    """
+    also pays attention to the mask, to be relative to its size
+    """
+    def __init__(self):
+        super(ExtendedL1Loss, self).__init__()
+        self.l1 = nn.L1Loss().cuda()
+
+    def forward(self, a, b, mask):
+        normalizer = self.l1(mask, torch.zeros(mask.shape).cuda())
+        # if normalizer < 0.1:
+        #     normalizer = 0.1
+        c = self.l1(mask * a, mask * b) / normalizer
+        return c
+
+
 class NonBlurryLoss(nn.Module):
     def __init__(self):
         """
