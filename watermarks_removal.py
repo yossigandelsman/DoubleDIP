@@ -314,7 +314,7 @@ ManyImageWatermarkResult = namedtuple("ManyImageWatermarkResult", ['cleans', 'ma
 
 
 class ManyImagesWatermarkNoHint(object):
-    def __init__(self, images_names, images, plot_during_training=True, num_iter_per_step=6000, num_step=1):
+    def __init__(self, images_names, images, plot_during_training=True, num_iter_per_step=4000, num_step=1):
         self.images = images
         self.images_names = images_names
         self.plot_during_training = plot_during_training
@@ -535,12 +535,12 @@ class ManyImagesWatermarkNoHint(object):
                                      0, 1), image])
 
 
-def remove_watermark_many_images(imgs_names, imgs, final_name):
+def remove_watermark_many_images(imgs_names, imgs, final_name, iters=3):
     results = []
     for img_name, original in zip(imgs_names, imgs):
         save_image(final_name + "_{}_original".format(img_name), original)
-    for i in range(3):
-        s = ManyImagesWatermarkNoHint([name + "_{}".format(i) for name in imgs_names], imgs, plot_during_training=True)
+    for i in range(iters):
+        s = ManyImagesWatermarkNoHint([name + "_{}".format(i) for name in imgs_names], imgs, plot_during_training=False)
         s.optimize()
         s.finalize()
         results.append(s.best_result)
