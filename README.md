@@ -17,9 +17,9 @@ If you find our work useful in your research or publication, please cite it:
 ```
 @article{DoubleDIP,
 author = {Gandelsman, Yossi and Shocher, Assaf and Irani, Michal},
-year = {2018},
-month = {12},
-pages = {},
+year = {2019},
+month = {6},
+booktitle = {The IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
 title = {"Double-DIP": Unsupervised Image Decomposition via Coupled Deep-Image-Priors}
 }
 ```
