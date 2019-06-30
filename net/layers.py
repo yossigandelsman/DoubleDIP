@@ -193,6 +193,20 @@ class VarianceLayer(nn.Module):
         return F.conv2d((Ex_E) ** 2, self.mean_mask)
 
 
+class CovarianceLayer(nn.Module):
+    def __init__(self, patch_size=5, channels=1):
+        self.patch_size = patch_size
+        super(CovarianceLayer, self).__init__()
+        mean_mask = np.ones((channels, channels, patch_size, patch_size)) / (patch_size * patch_size)
+        self.mean_mask = nn.Parameter(data=torch.cuda.FloatTensor(mean_mask), requires_grad=False)
+        mask = np.zeros((channels, channels, patch_size, patch_size))
+        mask[:, :, patch_size // 2, patch_size // 2] = 1.
+        self.ones_mask = nn.Parameter(data=torch.cuda.FloatTensor(mask), requires_grad=False)
+
+    def forward(self, x, y):
+        return F.conv2d((F.conv2d(x, self.ones_mask) - F.conv2d(x, self.mean_mask)) *
+                        (F.conv2d(y, self.ones_mask) - F.conv2d(y, self.mean_mask)), self.mean_mask)
+
 class GrayscaleLayer(nn.Module):
     def __init__(self):
         super(GrayscaleLayer, self).__init__()

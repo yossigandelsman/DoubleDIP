@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 import numpy as np
-from .layers import bn, VarianceLayer, GrayscaleLayer
+from .layers import bn, VarianceLayer, CovarianceLayer, GrayscaleLayer
 from .downsampler import * 
 from torch.nn import functional
 
@@ -144,4 +144,24 @@ class GradientLoss(nn.Module):
         gradient_a_x = torch.abs(a[:, :, :, :-1] - a[:, :, :, 1:])
         gradient_a_y = torch.abs(a[:, :, :-1, :] - a[:, :, 1:, :])
         return torch.mean(gradient_a_x) + torch.mean(gradient_a_y)
+
+
+class YIQGNGCLoss(nn.Module):
+    def __init__(self, shape=5):
+        super(YIQGNGCLoss, self).__init__()
+        self.shape = shape
+        self.var = VarianceLayer(self.shape, channels=1)
+        self.covar = CovarianceLayer(self.shape, channels=1)
+
+    def forward(self, x, y):
+        if x.shape[1] == 3:
+            x_g = rgb_to_yiq(x)[:, :1, :, :]  # take the Y part
+            y_g = rgb_to_yiq(y)[:, :1, :, :]  # take the Y part
+        else:
+            assert x.shape[1] == 1
+            x_g = x  # take the Y part
+            y_g = y  # take the Y part
+        c = torch.mean(self.covar(x_g, y_g) ** 2)
+        vv = torch.mean(self.var(x_g) * self.var(y_g))
+        return c / vv
 
